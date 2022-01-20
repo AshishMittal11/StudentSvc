@@ -4,7 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StudentSvc.Api.Configuration;
 using StudentSvc.Api.Database;
+using MediatR;
+using System.Reflection;
 
 namespace StudentSvc.Api
 {
@@ -25,6 +28,8 @@ namespace StudentSvc.Api
             {
                 options.UseSqlServer(Configuration.GetConnectionString("StudentDBConnectionString"));
             });
+
+            services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -34,6 +39,9 @@ namespace StudentSvc.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // mapter related configuration done here...
+            StudentConfiguration.Configure();
 
             app.UseHttpsRedirection();
 
