@@ -42,17 +42,21 @@ namespace StudentSvc.Api.Controllers
             return status;
         }
 
-        //// PUT api/<StudentController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
+        // PUT api/<StudentController>/5
+        [HttpPut("{id}")]
+        public async Task<bool> UpdateStudent (int id, [FromBody] StudentDto student)
+        {
+            student.Id = id;
+            var result = await this._mediator.Send(new UpdateStudentCommand { Student = student }).ConfigureAwait(false);
+            return result;
+        }
 
-        //}
-
-        //// DELETE api/<StudentController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
+        // Delete api/<studentcontroller>/5
+        [HttpDelete("{id}")]
+        public async Task<bool> DeleteStudent(int id)
+        {
+            bool status = await this._mediator.Send(new DeleteStudentCommand { StudentId = id }).ConfigureAwait(false);
+            return status;
+        }
     }
 }
