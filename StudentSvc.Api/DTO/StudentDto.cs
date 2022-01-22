@@ -10,12 +10,12 @@ namespace StudentSvc.Api.DTO
         public string LastName { get; set; }
         public string Gender { get; set; }
         public string Email { get; set; }
-        public byte[] Photo { get; set; }
+        public string PhotoBase64 { get; set; }
         public string CurrentAddress { get; set; }
         public string PermanentAddress { get; set; }
-        public DateTimeOffset Dob { get; set; }
+        public string Dob { get; set; }
         public bool IsActive { get; set; }
-        public DateTimeOffset CreatedDate { get; set; }
-        public DateTimeOffset ModifiedDate { get; set; }
+        public string CreatedDate { get; set; }
+        public string ModifiedDate { get; set; }
     }
 }
