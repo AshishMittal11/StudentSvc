@@ -34,8 +34,8 @@ namespace StudentSvc.Api.Controllers
             return student;
         }
 
-        [HttpGet("view/{firstNameChar}")]
-        public async Task<List<StudentDto>> GetStudentsByFirstName(string firstNameChar)
+        [HttpGet("viewbyfirstname")]
+        public async Task<List<StudentDto>> GetStudentsByFirstName([FromQuery] string firstNameChar)
         {
             var students = await this._mediator.Send(new GetStudentsByFirstNameCharQuery { FirstNameChar = firstNameChar }).ConfigureAwait(false);
             return students;

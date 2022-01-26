@@ -28,7 +28,8 @@ namespace StudentSvc.Api.CQRS.Query.QueryHandler
         {
             try
             {
-                var dbStudents = await _context.StudentSet.Where(x => x.FirstName.StartsWith(request.FirstNameChar, StringComparison.OrdinalIgnoreCase)).ToListAsync();
+                var likeExpression = $"{request.FirstNameChar}%";
+                var dbStudents = await _context.StudentSet.Where(x => EF.Functions.Like(x.FirstName, likeExpression)).ToListAsync().ConfigureAwait(false);
                 return dbStudents?.Adapt<List<StudentDto>>() ?? new List<StudentDto>();
             }
             catch(Exception ex)
