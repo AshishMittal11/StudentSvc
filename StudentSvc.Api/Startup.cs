@@ -8,6 +8,7 @@ using StudentSvc.Api.Configuration;
 using StudentSvc.Api.Database;
 using MediatR;
 using System.Reflection;
+using StudentSvc.Api.Azure;
 
 namespace StudentSvc.Api
 {
@@ -45,6 +46,8 @@ namespace StudentSvc.Api
                                   });
             });
             services.AddSwaggerGen();
+            services.Configure<TopicSettings>(Configuration.GetSection("TopicSettings"));
+            services.AddScoped<ServiceBusTopicSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

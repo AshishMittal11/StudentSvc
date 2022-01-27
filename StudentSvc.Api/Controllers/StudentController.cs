@@ -1,8 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using StudentSvc.Api.Azure;
 using StudentSvc.Api.CQRS.Command;
 using StudentSvc.Api.CQRS.Query;
 using StudentSvc.Api.DTO;
+using StudentSvc.Api.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
