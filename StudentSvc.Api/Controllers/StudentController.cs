@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StudentSvc.Api.Azure;
 using StudentSvc.Api.CQRS.Command;
 using StudentSvc.Api.CQRS.Query;

@@ -9,6 +9,7 @@ using StudentSvc.Api.Database;
 using MediatR;
 using System.Reflection;
 using StudentSvc.Api.Azure;
+using StudentSvc.Api.Models;
 
 namespace StudentSvc.Api
 {
@@ -50,6 +51,8 @@ namespace StudentSvc.Api
 
             services.AddHttpClient();
 
+            services.Configure<ExternalServices>(Configuration.GetSection("ExternalServices"));
+
             // this is for reading the topic, endpoints and subscription from the appsetting file.
             services.Configure<TopicSettings>(Configuration.GetSection("TopicSettings"));
 
@@ -63,7 +66,7 @@ namespace StudentSvc.Api
             services.AddSingleton<IProcessData, ProcessData>();
 
             // hosting this service to run in the background, this is acting as listener to the subscription.....
-            services.AddHostedService<WorkerServiceBus>();  
+            services.AddHostedService<WorkerServiceBus>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
