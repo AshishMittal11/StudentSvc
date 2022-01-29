@@ -20,6 +20,10 @@ namespace StudentSvc.Api.Azure
 
         public async Task Process(MyPayload myPayload)
         {
+            if (myPayload == null) throw new ArgumentNullException(nameof(myPayload));
+            if (string.IsNullOrWhiteSpace(myPayload.Url)) throw new ArgumentNullException(nameof(myPayload.Url));
+            if (string.IsNullOrWhiteSpace(myPayload.Message)) throw new ArgumentNullException(nameof(myPayload.Message));   
+
             try
             {
                 using (var client = this._factory.CreateClient())
