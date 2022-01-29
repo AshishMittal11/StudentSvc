@@ -50,7 +50,7 @@ namespace StudentSvc.Api.CQRS.Command.CommandHandler
                 mail.Body = $"Hello";
 
                 var service = this._services[NAME];
-                string link = service.Args.First(x => x.Name.ToUpperInvariant() == "saveemail".ToUpperInvariant()).Link;
+                string link = service.Args.First(x => x.Name.ToUpperInvariant() == "SaveEmail".ToUpperInvariant()).Link;
                 string url = $"{service.Base}/{link}";
 
                 var payload = new MyPayload
