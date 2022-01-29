@@ -45,9 +45,25 @@ namespace StudentSvc.Api
                                       builder.AllowAnyOrigin();
                                   });
             });
+
             services.AddSwaggerGen();
+
+            services.AddHttpClient();
+
+            // this is for reading the topic, endpoints and subscription from the appsetting file.
             services.Configure<TopicSettings>(Configuration.GetSection("TopicSettings"));
+
+            // this is the wrapper class which will send the message to the topic which internally will send the message to its corresponding subscriptions.
             services.AddScoped<ServiceBusTopicSender>();
+
+            // this is the consumer of service bus thrown messages.
+            services.AddSingleton<IServiceBusConsumer, ServiceBusConsumer>();
+
+            // this will process the message and extract the content and url and will throw the content at the mentioned url.
+            services.AddSingleton<IProcessData, ProcessData>();
+
+            // hosting this service to run in the background, this is acting as listener to the subscription.....
+            services.AddHostedService<WorkerServiceBus>();  
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
