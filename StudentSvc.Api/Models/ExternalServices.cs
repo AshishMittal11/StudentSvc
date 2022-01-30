@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace StudentSvc.Api.Models
@@ -11,6 +12,20 @@ namespace StudentSvc.Api.Models
             get
             {
                 return this.Services?.FirstOrDefault(x => x.Name.ToUpperInvariant() == name.ToUpperInvariant()) ?? null;
+            }
+        }
+
+        public string GetFullPath(string serviceName, string link)
+        {
+            var service = this.Services.FirstOrDefault(x => x.Name.ToUpperInvariant() == serviceName.ToUpperInvariant());
+            if (service== null)
+            {
+                throw new Exception("Service is missing");
+            }
+            else
+            {
+                var arg = service.Args.FirstOrDefault(x => x.Name.ToUpperInvariant() == link.ToUpperInvariant()) ?? throw new Exception("link address is missing.");
+                return $"{service.Base}/{arg.Link}";
             }
         }
     }
