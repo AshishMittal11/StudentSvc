@@ -22,6 +22,19 @@ namespace StudentSvc.Api.Repository
             this._cosmosSettings = options.Value;
         }
 
+        public Task<bool> IsStudentPresentInCosmosAsync(Student student)
+        {
+            //using (var client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
+            //{
+            //    var database = client.GetDatabase(DatabaseId);
+            //    var container = database.GetContainer(ContainerId);
+            //    string query = $"SELECT * FROM c where lower(c.FirstName) = '{student.FirstName.ToLower()}' and lower(c.LastName) = '{student.LastName.ToLower()}' and lower(c.MiddleName) = '{student.MiddleName.ToLower()}' and lower(c.Email) = '{student.Email.ToLower()}'";   
+            //    var iterator = container.GetItemQueryIterator<StudentCosmos>(queryText: query);
+            //}
+            
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Saves student information to the cosmos....
         /// </summary>
