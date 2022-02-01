@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using StudentSvc.Api.Cosmos;
 using StudentSvc.Api.DTO;
 using StudentSvc.Api.Models;
 using System;
@@ -36,6 +37,13 @@ namespace StudentSvc.Api.Configuration
                         dest.PhotoBase64 = Convert.ToBase64String(src.Photo);
                     }
                 });
+
+            TypeAdapterConfig<Student, StudentCosmos>
+                .ForType()
+                .Map(dest => dest.StudentId, src => src.Id)
+                .Map(dest => dest.Id, src => Guid.NewGuid())
+                .Map(dest => dest.CreatedOn, src => DateTimeOffset.UtcNow)
+                .Map(dest => dest.ModifiedOn, src => DateTimeOffset.UtcNow);
         }
     }
 }

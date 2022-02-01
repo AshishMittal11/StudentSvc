@@ -52,6 +52,14 @@ namespace StudentSvc.Api.Controllers
             return status;
         }
 
+        // POST api/<StudentController>
+        [HttpPost("cosmos/register")]
+        public async Task<bool> CosmosRegister([FromBody] StudentDto student)
+        {
+            bool status = await this._mediator.Send(new RegisterStudentInCosmosCommand { Student = student }).ConfigureAwait(false);
+            return status;
+        }
+
         // PUT api/<StudentController>/5
         [HttpPut("{id}")]
         public async Task<bool> UpdateStudent (int id, [FromBody] StudentDto student)

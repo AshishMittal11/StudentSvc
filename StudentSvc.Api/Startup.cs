@@ -10,6 +10,8 @@ using MediatR;
 using System.Reflection;
 using StudentSvc.Api.Azure;
 using StudentSvc.Api.Models;
+using StudentSvc.Api.Repository;
+using StudentSvc.Api.Cosmos;
 
 namespace StudentSvc.Api
 {
@@ -51,10 +53,15 @@ namespace StudentSvc.Api
 
             services.AddHttpClient();
 
+            // this is for sending the data to the cosmos db....
+            services.Configure<CosmosSettings>(Configuration.GetSection("CosmosSettings"));
+
             services.Configure<ExternalServices>(Configuration.GetSection("ExternalServices"));
 
             // this is for reading the topic, endpoints and subscription from the appsetting file.
             services.Configure<TopicSettings>(Configuration.GetSection("TopicSettings"));
+
+            services.AddScoped<IStudentRepository, StudentRepository>();
 
             // this is the wrapper class which will send the message to the topic which internally will send the message to its corresponding subscriptions.
             services.AddScoped<ServiceBusTopicSender>();
