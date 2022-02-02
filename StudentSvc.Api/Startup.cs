@@ -74,6 +74,9 @@ namespace StudentSvc.Api
 
             // hosting this service to run in the background, this is acting as listener to the subscription.....
             services.AddHostedService<WorkerServiceBus>();
+
+            // setting up the application insights for logging and tracing...
+            services.AddApplicationInsightsTelemetry();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

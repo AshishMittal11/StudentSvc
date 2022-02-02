@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StudentSvc.Api.Azure;
 using StudentSvc.Api.CQRS.Command;
@@ -16,10 +17,12 @@ namespace StudentSvc.Api.Controllers
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<StudentController> _logger;
 
-        public StudentController(IMediator mediator)
+        public StudentController(IMediator mediator, ILogger<StudentController> logger)
         {
             this._mediator = mediator;
+            this._logger = logger;
         }
 
         [HttpGet("view")]

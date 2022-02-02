@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using StudentSvc.Api.Cosmos;
 using StudentSvc.Api.Models;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace StudentSvc.Api.Repository
@@ -22,17 +23,75 @@ namespace StudentSvc.Api.Repository
             this._cosmosSettings = options.Value;
         }
 
-        public Task<bool> IsStudentPresentInCosmosAsync(Student student)
+        public bool IsStudentPresentInCosmos(Student student)
         {
-            //using (var client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
-            //{
-            //    var database = client.GetDatabase(DatabaseId);
-            //    var container = database.GetContainer(ContainerId);
-            //    string query = $"SELECT * FROM c where lower(c.FirstName) = '{student.FirstName.ToLower()}' and lower(c.LastName) = '{student.LastName.ToLower()}' and lower(c.MiddleName) = '{student.MiddleName.ToLower()}' and lower(c.Email) = '{student.Email.ToLower()}'";   
-            //    var iterator = container.GetItemQueryIterator<StudentCosmos>(queryText: query);
-            //}
-            
-            throw new NotImplementedException();
+            using (var client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
+            {
+                var database = client.GetDatabase(DatabaseId);
+                var container = database.GetContainer(ContainerId);
+                string query = GenerateQuery(student);
+                var iterator = container.GetItemQueryIterator<StudentCosmos>(query);
+                return iterator.HasMoreResults;
+            }
+        }
+
+        private string GenerateQuery(Student student)
+        {
+            if (!string.IsNullOrWhiteSpace(student.FirstName)
+                                || !string.IsNullOrWhiteSpace(student.MiddleName)
+                                || !string.IsNullOrWhiteSpace(student.LastName))
+            {
+                StringBuilder sb = new StringBuilder();
+
+                sb.Append("Select * from c where");
+
+                if (!string.IsNullOrWhiteSpace(student.FirstName))
+                {
+                    sb.AppendFormat(" lower(c.FirstName) = '{0}'", student.FirstName);
+                }
+
+                if (!string.IsNullOrWhiteSpace(student.MiddleName))
+                {
+                    if (sb.ToString().Contains("c.FirstName"))
+                    {
+                        sb.AppendFormat(" and lower(c.MiddleName) = '{0}'", student.MiddleName);
+                    }
+                    else
+                    {
+                        sb.AppendFormat(" lower(c.MiddleName) = '{0}'", student.MiddleName);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(student.LastName))
+                {
+                    if (sb.ToString().Contains("c.FirstName") || sb.ToString().Contains("c.MiddleName"))
+                    {
+                        sb.AppendFormat(" and lower(c.LastName) = '{0}'", student.LastName);
+                    }
+                    else
+                    {
+                        sb.AppendFormat(" lower(c.LastName) = '{0}'", student.LastName);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(student.Email))
+                {
+                    if (sb.ToString().Contains("c.FirstName") || sb.ToString().Contains("c.MiddleName") || sb.ToString().Contains("c.LastName"))
+                    {
+                        sb.AppendFormat(" and lower(c.Email) = '{0}'", student.Email);
+                    }
+                    else
+                    {
+                        sb.AppendFormat(" lower(c.Email) = '{0}'", student.Email);
+                    }
+                }
+
+                return sb.ToString();
+            }
+            else
+            {
+                throw new Exception("Details are missing");
+            }
         }
 
         /// <summary>
@@ -44,25 +103,48 @@ namespace StudentSvc.Api.Repository
         {
             try
             {
-                using (CosmosClient client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
+                bool status = false;
+                if (!IsStudentPresentInCosmos(student))
                 {
-                    var cosmosItem = student.Adapt<StudentCosmos>();
-                    var database = client.GetDatabase(DatabaseId);
-                    var container = database.GetContainer(ContainerId);
-                    var response = await container.CreateItemAsync(cosmosItem).ConfigureAwait(false);
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.Created)
+                    using (CosmosClient client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
                     {
-                        return true;
+                        var cosmosItem = student.Adapt<StudentCosmos>();
+                        var database = client.GetDatabase(DatabaseId);
+                        var container = database.GetContainer(ContainerId);
+                        var response = await container.CreateItemAsync(cosmosItem).ConfigureAwait(false);
+                        status = response.StatusCode == System.Net.HttpStatusCode.Created;
                     }
-
-                    return false;
                 }
+                else
+                {
+                    status = await UpdateStudentToCosmosAsync(student).ConfigureAwait(false);
+                }
+
+                return status;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message, student);
                 throw;
+            }
+        }
+
+        public async Task<bool> UpdateStudentToCosmosAsync(Student student)
+        {
+            using (var client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
+            {
+                var cosmosItem = student.Adapt<StudentCosmos>();
+                var database = client.GetDatabase(DatabaseId);
+                var container = database.GetContainer(ContainerId);
+                string query = GenerateQuery(student);
+                var iterator = container.GetItemQueryIterator<StudentCosmos>(query);
+
+                while (iterator.HasMoreResults)
+                {
+                    var item = await iterator.ReadNextAsync().ConfigureAwait(false);
+                }
+
+                return true;
             }
         }
     }
