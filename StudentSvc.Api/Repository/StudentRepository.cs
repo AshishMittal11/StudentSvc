@@ -9,6 +9,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace StudentSvc.Api.Repository
 {
@@ -97,15 +98,27 @@ namespace StudentSvc.Api.Repository
             {
                 var database = client.GetDatabase(DatabaseId);
                 var container = database.GetContainer(ContainerId);
-                string query = $"select * from c where lower(c.Email) = {email.ToLower()}";
-                var iterator = container.GetItemQueryIterator<StudentCosmos>(new QueryDefinition(query));
+
+                string query = $"SELECT COUNT(1) FROM c WHERE  LOWER(c.Email) = '{email.ToLower()}'";
+
+                var iterator = container.GetItemQueryIterator<CountResult>(query);
+
                 if (iterator.HasMoreResults)
                 {
-                    var response = await iterator.ReadNextAsync().ConfigureAwait(false);
-                    var studentCosmos = response.Resource.First();
-                    var dbStudent = studentCosmos.Adapt<Student>();
-                    var studentDto = dbStudent.Adapt<StudentDto>();
-                    return studentDto;
+                    var result = await iterator.ReadNextAsync().ConfigureAwait(false);
+                    if (result?.Resource?.Count() == 1)
+                    {
+                        query = $"SELECT * FROM c WHERE LOWER(c.Email) = '{email.ToLower()}'";
+                        var cosmosIterator = container.GetItemQueryIterator<StudentCosmos>(new QueryDefinition(query));
+                        if (cosmosIterator.HasMoreResults)
+                        {
+                            var response = await cosmosIterator.ReadNextAsync().ConfigureAwait(false);
+                            var studentCosmos = response.Resource.First();
+                            var dbStudent = studentCosmos.Adapt<Student>();
+                            var studentDto = dbStudent.Adapt<StudentDto>();
+                            return studentDto;
+                        }
+                    }
                 }
 
                 return null;
