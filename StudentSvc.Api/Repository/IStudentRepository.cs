@@ -1,4 +1,5 @@
-﻿using StudentSvc.Api.Models;
+﻿using StudentSvc.Api.DTO;
+using StudentSvc.Api.Models;
 using System.Threading.Tasks;
 
 namespace StudentSvc.Api.Repository
@@ -8,5 +9,6 @@ namespace StudentSvc.Api.Repository
         Task<bool> SaveStudentToCosmosAsync(Student student);
         Task<bool> UpdateStudentToCosmosAsync(Student student);
         bool IsStudentPresentInCosmos(Student student);
+        Task<StudentDto> GetStudentFromCosmosByEmailAsync(string email);
     }
 }

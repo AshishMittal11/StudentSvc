@@ -44,6 +44,10 @@ namespace StudentSvc.Api.Configuration
                 .Map(dest => dest.Id, src => Guid.NewGuid())
                 .Map(dest => dest.CreatedOn, src => DateTimeOffset.UtcNow)
                 .Map(dest => dest.ModifiedOn, src => DateTimeOffset.UtcNow);
+
+            TypeAdapterConfig<StudentCosmos, Student>
+                .ForType()
+                .Map(dest => dest.Id, src => src.StudentId);
         }
     }
 }

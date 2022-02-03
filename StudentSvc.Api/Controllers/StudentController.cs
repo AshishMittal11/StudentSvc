@@ -63,6 +63,13 @@ namespace StudentSvc.Api.Controllers
             return status;
         }
 
+        [HttpGet("view/cosmos/student")]
+        public async Task<StudentDto> GetStudentFromCosmos([FromQuery] string email)
+        {
+            var student = await this._mediator.Send(new GetStudentFromCosmosByEmailQuery { Email = email }).ConfigureAwait(false);
+            return student;
+        }
+
         // PUT api/<StudentController>/5
         [HttpPut("{id}")]
         public async Task<bool> UpdateStudent (int id, [FromBody] StudentDto student)

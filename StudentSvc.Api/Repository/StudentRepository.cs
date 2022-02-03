@@ -3,10 +3,12 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StudentSvc.Api.Cosmos;
+using StudentSvc.Api.DTO;
 using StudentSvc.Api.Models;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace StudentSvc.Api.Repository
 {
@@ -32,6 +34,81 @@ namespace StudentSvc.Api.Repository
                 string query = GenerateQuery(student);
                 var iterator = container.GetItemQueryIterator<StudentCosmos>(query);
                 return iterator.HasMoreResults;
+            }
+        }
+
+        /// <summary>
+        /// Saves student information to the cosmos....
+        /// </summary>
+        /// <param name="student"></param>
+        /// <returns></returns>
+        public async Task<bool> SaveStudentToCosmosAsync(Student student)
+        {
+            try
+            {
+                bool status = false;
+                if (!IsStudentPresentInCosmos(student))
+                {
+                    using (CosmosClient client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
+                    {
+                        var cosmosItem = student.Adapt<StudentCosmos>();
+                        var database = client.GetDatabase(DatabaseId);
+                        var container = database.GetContainer(ContainerId);
+                        var response = await container.CreateItemAsync(cosmosItem).ConfigureAwait(false);
+                        status = response.StatusCode == System.Net.HttpStatusCode.Created;
+                    }
+                }
+                else
+                {
+                    status = await UpdateStudentToCosmosAsync(student).ConfigureAwait(false);
+                }
+
+                return status;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, student);
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateStudentToCosmosAsync(Student student)
+        {
+            using (var client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
+            {
+                var cosmosItem = student.Adapt<StudentCosmos>();
+                var database = client.GetDatabase(DatabaseId);
+                var container = database.GetContainer(ContainerId);
+                string query = GenerateQuery(student);
+                var iterator = container.GetItemQueryIterator<StudentCosmos>(query);
+
+                while (iterator.HasMoreResults)
+                {
+                    var item = await iterator.ReadNextAsync().ConfigureAwait(false);
+                }
+
+                return true;
+            }
+        }
+
+        public async Task<StudentDto> GetStudentFromCosmosByEmailAsync(string email)
+        {
+            using (var client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
+            {
+                var database = client.GetDatabase(DatabaseId);
+                var container = database.GetContainer(ContainerId);
+                string query = $"select * from c where lower(c.Email) = {email.ToLower()}";
+                var iterator = container.GetItemQueryIterator<StudentCosmos>(new QueryDefinition(query));
+                if (iterator.HasMoreResults)
+                {
+                    var response = await iterator.ReadNextAsync().ConfigureAwait(false);
+                    var studentCosmos = response.Resource.First();
+                    var dbStudent = studentCosmos.Adapt<Student>();
+                    var studentDto = dbStudent.Adapt<StudentDto>();
+                    return studentDto;
+                }
+
+                return null;
             }
         }
 
@@ -94,58 +171,5 @@ namespace StudentSvc.Api.Repository
             }
         }
 
-        /// <summary>
-        /// Saves student information to the cosmos....
-        /// </summary>
-        /// <param name="student"></param>
-        /// <returns></returns>
-        public async Task<bool> SaveStudentToCosmosAsync(Student student)
-        {
-            try
-            {
-                bool status = false;
-                if (!IsStudentPresentInCosmos(student))
-                {
-                    using (CosmosClient client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
-                    {
-                        var cosmosItem = student.Adapt<StudentCosmos>();
-                        var database = client.GetDatabase(DatabaseId);
-                        var container = database.GetContainer(ContainerId);
-                        var response = await container.CreateItemAsync(cosmosItem).ConfigureAwait(false);
-                        status = response.StatusCode == System.Net.HttpStatusCode.Created;
-                    }
-                }
-                else
-                {
-                    status = await UpdateStudentToCosmosAsync(student).ConfigureAwait(false);
-                }
-
-                return status;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message, student);
-                throw;
-            }
-        }
-
-        public async Task<bool> UpdateStudentToCosmosAsync(Student student)
-        {
-            using (var client = new CosmosClient(_cosmosSettings.PrimaryConnectionString))
-            {
-                var cosmosItem = student.Adapt<StudentCosmos>();
-                var database = client.GetDatabase(DatabaseId);
-                var container = database.GetContainer(ContainerId);
-                string query = GenerateQuery(student);
-                var iterator = container.GetItemQueryIterator<StudentCosmos>(query);
-
-                while (iterator.HasMoreResults)
-                {
-                    var item = await iterator.ReadNextAsync().ConfigureAwait(false);
-                }
-
-                return true;
-            }
-        }
     }
 }
