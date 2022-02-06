@@ -36,5 +36,7 @@ namespace StudentSvc.Api.Models
 
         [Required]
         public bool IsActive { get; set; }
+
+        public int? AdmittedClassId { get; set; }
     }
 }

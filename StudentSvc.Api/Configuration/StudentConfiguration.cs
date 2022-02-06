@@ -17,6 +17,7 @@ namespace StudentSvc.Api.Configuration
                 .ForType()
                 .Map(dest => dest.CreatedDate, src => DateTimeOffset.UtcNow)
                 .Map(dest => dest.ModifiedDate, src => DateTimeOffset.UtcNow)
+                .Map(dest => dest.AdmittedClassId, src => int.Parse(src.AdmittedClassId))
                 .AfterMapping((src, dest) =>
                 {
                     if (!string.IsNullOrWhiteSpace(src.PhotoBase64))
@@ -30,6 +31,7 @@ namespace StudentSvc.Api.Configuration
                 .Map(dest => dest.CreatedDate, src => src.CreatedDate.ToString("MM/dd/yyyy"))
                 .Map(dest => dest.ModifiedDate, src => src.ModifiedDate.ToString("MM/dd/yyyy"))
                 .Map(dest => dest.Dob, src => src.Dob.ToString("MM/dd/yyyy"))
+                .Map(dest => dest.AdmittedClassId, src => src.AdmittedClassId.ToString())
                 .AfterMapping((src, dest) =>
                 {
                     if (src?.Photo?.Length > 0)

@@ -10,6 +10,7 @@ namespace StudentSvc.Api.DTO
         public string LastName { get; set; }
         public string Gender { get; set; }
         public string Email { get; set; }
+        public string AdmittedClassId { get; set; }
         public string PhotoBase64 { get; set; }
         public string CurrentAddress { get; set; }
         public string PermanentAddress { get; set; }
